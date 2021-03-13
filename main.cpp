@@ -5,7 +5,6 @@
 
 class Formats
 {
-    std::string m_format;
     std::string m_zip = "4b50 0403 0014";
     std::string m_pdf = "5025 4644 312d";
     std::string m_run = "457f 464c 0102";
@@ -13,9 +12,6 @@ class Formats
     std::string m_png = "5089 474e 0a0d";
     std::string m_rar = "6152 2172 071a";
     std::string m_mp3 = "4449 0333";
-    std::string m_doc = m_zip;
-    std::string m_xlsx = m_doc;
-
 public:
     std::string currentFormat(std::string format)
     {
@@ -33,14 +29,14 @@ public:
             return m_rar;
         else if (format == "mp3")
             return m_mp3;
-        else if (format == "doc")
-            return m_doc;
-        else if (format == "xlsx")
-            return m_xlsx;
         else
-            throw std::exception();
+        {
+            std::string exp("Undefined format");
+            throw exp;
+        }
     }
 };
+
 
 int main(int argc, char *argv[])
 {
@@ -48,6 +44,7 @@ int main(int argc, char *argv[])
         std::string nameOfDir;
         std::string typeOfOperation;
         std::string inputFormat;
+
         int countOfAllFiles = 0;
         int countOfMatchingFiles = 0;
 
@@ -55,7 +52,8 @@ int main(int argc, char *argv[])
 
         if (argc != 4)
         {
-            throw std::exception();
+            std::string exp("Too many argument");
+            throw exp;
         }
 
         for (int i = 1; i < argc; ++i)
@@ -68,11 +66,20 @@ int main(int argc, char *argv[])
             else
                 inputFormat = arg;
         }
-        std::cout << "Dir = " << nameOfDir << std::endl;
-        std::cout << "Format = " << inputFormat << std::endl;
-        std::cout << "Operation = " << typeOfOperation << std::endl;
+
+        if (typeOfOperation != "ctrlSum")
+        {
+            std::string exp("Uncorrect operation");
+            throw exp;
+        }
+
 
         boost::filesystem::path dir(nameOfDir);
+        if (!boost::filesystem::exists(dir))
+        {
+            std::string exp("Directory is not exist");
+            throw exp;
+        }
         boost::filesystem::recursive_directory_iterator it(dir), endIt;
         std::string absolutPath(boost::filesystem::current_path().string());
 
@@ -90,9 +97,13 @@ int main(int argc, char *argv[])
                 if (hexFile.is_open())
                 {
                     getline(hexFile,temp);
-//                    std::cout << temp << std::endl;
+                    hexFile.close();
                 }
-                hexFile.close();
+                else
+                {
+                    std::string exp("Hex file is not opened");
+                    throw exp;
+                }
 
                 Formats formats;
                 std::string currentFormat = formats.currentFormat(inputFormat);
@@ -103,15 +114,20 @@ int main(int argc, char *argv[])
 
                     std::string forMd5Sum("md5sum " + it->path().string() + " > md5sum.txt");
                     system(forMd5Sum.c_str());
-                    std::ifstream md5SumFile(absolutPath + "/md5sum.txt");
 
+                    std::ifstream md5SumFile(absolutPath + "/md5sum.txt");
                     if(md5SumFile.is_open())
                     {
                         std::string temp;
                         getline(md5SumFile, temp);
                         resultOfHash.push_back(temp);
+                        md5SumFile.close();
                     }
-                    md5SumFile.close();
+                    else
+                    {
+                        std::string exp("Md5Sum file is not opened");
+                        throw exp;
+                    }
                 }
             }
         }
@@ -126,8 +142,8 @@ int main(int argc, char *argv[])
 
         return 0;
 
-    }  catch (...) {
-        std::cout << "Error!" << std::endl;
+    }  catch (std::string exp) {
+        std::cout << exp << std::endl;
         return -1;
     }
 }
