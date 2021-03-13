@@ -13,7 +13,7 @@ class Formats
     std::string m_rar = "6152 2172 071a";
     std::string m_mp3 = "4449 0333";
 public:
-    std::string currentFormat(std::string format)
+    std::string currentFormat(const std::string& format)
     {
         if (format == "zip")
             return m_zip;
@@ -29,6 +29,10 @@ public:
             return m_rar;
         else if (format == "mp3")
             return m_mp3;
+        else if (format == "")
+        {
+            return "0";
+        }
         else
         {
             std::string exp("Undefined format");
@@ -50,7 +54,7 @@ int main(int argc, char *argv[])
 
         std::list<std::string> resultOfHash;
 
-        if (argc != 4)
+        if (argc > 4)
         {
             std::string exp("Too many argument");
             throw exp;
@@ -80,10 +84,11 @@ int main(int argc, char *argv[])
             std::string exp("Directory is not exist");
             throw exp;
         }
-        boost::filesystem::recursive_directory_iterator it(dir), endIt;
+
+        boost::filesystem::recursive_directory_iterator endIt;
         std::string absolutPath(boost::filesystem::current_path().string());
 
-        for (it; it != endIt; ++it)
+        for (boost::filesystem::recursive_directory_iterator it(dir) ; it != endIt; ++it)
         {
             if (!boost::filesystem::is_directory(*it))
             {
@@ -108,7 +113,7 @@ int main(int argc, char *argv[])
                 Formats formats;
                 std::string currentFormat = formats.currentFormat(inputFormat);
 
-                if (temp.find(currentFormat) < temp.size())
+                if (currentFormat == "0" || temp.find(currentFormat) < temp.size())
                 {
                     ++countOfMatchingFiles;
 
