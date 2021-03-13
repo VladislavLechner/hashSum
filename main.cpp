@@ -4,16 +4,18 @@
 #include <fstream>
 
 class Formats
-{
-    std::string m_zip = "4b50 0403 0014";
-    std::string m_pdf = "5025 4644 312d";
-    std::string m_run = "457f 464c 0102";
-    std::string m_webp = "4952 4646 8cf6";
-    std::string m_png = "5089 474e 0a0d";
-    std::string m_rar = "6152 2172 071a";
-    std::string m_mp3 = "4449 0333";
+{  
+    // Изменил на пары, потому что некоторые оси используют Big Ending, а некоторые Little Ending. Я учел этот вариант
+    std::pair<std::string, std::string> m_zip = std::make_pair("4b50 0403 0014","504b 0304 1400");
+    std::pair<std::string, std::string> m_pdf = std::make_pair("5025 4644 312d","2550 4446 2d31");
+    std::pair<std::string, std::string> m_run = std::make_pair("457f 464c 0102","7f45 4c46 0201");
+    std::pair<std::string, std::string> m_webp = std::make_pair("4952 4646 8cf6","5249 4646 f68c");
+    std::pair<std::string, std::string> m_png = std::make_pair("5089 474e 0a0d","8950 4e47 0d0a");
+    std::pair<std::string, std::string> m_rar = std::make_pair("6152 2172 071a","5261 7221 1a07");
+    std::pair<std::string, std::string> m_mp3 = std::make_pair("4449 0333","4944 3303");
+
 public:
-    std::string currentFormat(const std::string& format)
+    std::pair<std::string, std::string> currentFormat(const std::string& format)
     {
         if (format == "zip")
             return m_zip;
@@ -31,7 +33,7 @@ public:
             return m_mp3;
         else if (format == "")
         {
-            return "0";
+            return std::make_pair("0","0");
         }
         else
         {
@@ -111,9 +113,9 @@ int main(int argc, char *argv[])
                 }
 
                 Formats formats;
-                std::string currentFormat = formats.currentFormat(inputFormat);
+                std::pair<std::string, std::string> currentFormat = formats.currentFormat(inputFormat);
 
-                if (currentFormat == "0" || temp.find(currentFormat) < temp.size())
+                if (temp.find(currentFormat.first) < temp.size() || temp.find(currentFormat.second) < temp.size())
                 {
                     ++countOfMatchingFiles;
 
