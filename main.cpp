@@ -3,22 +3,49 @@
 #include <iostream>
 #include <fstream>
 
+
+std::string md5Sum(std::string path)
+{
+    std::string result;
+    std::string forMd5Sum("md5sum " + path + " > md5sum.txt");
+    system(forMd5Sum.c_str());
+    std::ifstream md5SumFile(boost::filesystem::current_path().string() + "/md5sum.txt");
+    if(md5SumFile.is_open())
+    {
+        getline(md5SumFile, result);
+        md5SumFile.close();
+    }
+    else
+    {
+        std::string exp("Md5Sum file is not opened");
+        throw exp;
+    }
+    return result;
+}
+
 class Formats
 {  
-    // Изменил на пары, потому что некоторые оси используют Big Endiang, а некоторые Little Endiang. Я учел этот вариант
-    std::pair<std::string, std::string> m_zip = std::make_pair("4b50 0403 0014","504b 0304 1400");
-    std::pair<std::string, std::string> m_pdf = std::make_pair("5025 4644 312d","2550 4446 2d31");
-    std::pair<std::string, std::string> m_run = std::make_pair("457f 464c 0102","7f45 4c46 0201");
-    std::pair<std::string, std::string> m_webp = std::make_pair("4952 4646 8cf6","5249 4646 f68c");
-    std::pair<std::string, std::string> m_png = std::make_pair("5089 474e 0a0d","8950 4e47 0d0a");
-    std::pair<std::string, std::string> m_rar = std::make_pair("6152 2172 071a","5261 7221 1a07");
-    std::pair<std::string, std::string> m_mp3 = std::make_pair("4449 0333","4944 3303");
+    std::string m_pdf = "PDF";
+    std::string m_zip = "Zip";
+    std::string m_rar = "RAR";
+    std::string m_jpg = "JPEG";
+    std::string m_doc = "Microsoft Word";
+    std::string m_txt = "ASCII text";
+    std::string m_mp3 = "Audio file with ID3";
+    std::string m_png = "PNG";
+    std::string m_run = "ELF";
+    std::string m_webp = "RIFF";
+    std::string m_xlsx = "Microsoft Excel";
 
 public:
-    std::pair<std::string, std::string> currentFormat(const std::string& format)
+    std::string currentFormat(const std::string& format)
     {
         if (format == "zip")
             return m_zip;
+        else if(format == "txt")
+            return m_txt;
+        else if(format == "jpg")
+            return m_jpg;
         else if (format == "pdf")
             return m_pdf;
         else if (format == "run")
@@ -33,7 +60,7 @@ public:
             return m_mp3;
         else if (format == "")
         {
-            return std::make_pair("0","0");
+            return "";
         }
         else
         {
@@ -41,7 +68,32 @@ public:
             throw exp;
         }
     }
+
+    bool matching(std::string path, std::string inputFormat)
+    {
+        std::string forHex("file -b " + path + " > format.txt");
+        system(forHex.c_str());
+        std::ifstream formatFile(boost::filesystem::current_path().string() + "/format.txt");
+        std::string temp;
+
+        if (formatFile.is_open())
+        {
+            getline(formatFile,temp);
+            formatFile.close();
+        }
+        else
+        {
+            std::string exp("Hex file is not opened");
+            throw exp;
+        }
+        size_t pos = temp.find(",");
+        if (pos < temp.size())
+            temp.erase(pos, temp.size());
+        return (temp.find(currentFormat(inputFormat)) < temp.size());
+    }
 };
+
+
 
 
 int main(int argc, char *argv[])
@@ -87,54 +139,24 @@ int main(int argc, char *argv[])
             throw exp;
         }
 
-        boost::filesystem::recursive_directory_iterator endIt;
-        std::string absolutPath(boost::filesystem::current_path().string());
+        if (!boost::filesystem::is_directory(dir) && inputFormat == "")
+        {
+            std::cout << "For only one file" << std::endl << md5Sum(dir.string()) << std::endl;
+            return 0;
+        }
 
-        for (boost::filesystem::recursive_directory_iterator it(dir) ; it != endIt; ++it)
+        boost::filesystem::recursive_directory_iterator endIt;
+
+        for (boost::filesystem::recursive_directory_iterator it(dir); it != endIt; ++it)
         {
             if (!boost::filesystem::is_directory(*it))
             {
                 ++countOfAllFiles;
-
-                std::string forHex("hexdump " + it->path().string() + " > hex.txt");
-                system(forHex.c_str());
-                std::ifstream hexFile(absolutPath + "/hex.txt");
-                std::string temp;
-
-                if (hexFile.is_open())
-                {
-                    getline(hexFile,temp);
-                    hexFile.close();
-                }
-                else
-                {
-                    std::string exp("Hex file is not opened");
-                    throw exp;
-                }
-
-                Formats formats;
-                std::pair<std::string, std::string> currentFormat = formats.currentFormat(inputFormat);
-
-                if (temp.find(currentFormat.first) < temp.size() || temp.find(currentFormat.second) < temp.size())
+                Formats format;
+                if (format.matching(it->path().string(), inputFormat))
                 {
                     ++countOfMatchingFiles;
-
-                    std::string forMd5Sum("md5sum " + it->path().string() + " > md5sum.txt");
-                    system(forMd5Sum.c_str());
-
-                    std::ifstream md5SumFile(absolutPath + "/md5sum.txt");
-                    if(md5SumFile.is_open())
-                    {
-                        std::string temp;
-                        getline(md5SumFile, temp);
-                        resultOfHash.push_back(temp);
-                        md5SumFile.close();
-                    }
-                    else
-                    {
-                        std::string exp("Md5Sum file is not opened");
-                        throw exp;
-                    }
+                    resultOfHash.push_back(md5Sum(it->path().string()));
                 }
             }
         }
