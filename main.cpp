@@ -5,7 +5,7 @@
 
 class Formats
 {  
-    // Изменил на пары, потому что некоторые оси используют Big Ending, а некоторые Little Ending. Я учел этот вариант
+    // Изменил на пары, потому что некоторые оси используют Big Endiang, а некоторые Little Endiang. Я учел этот вариант
     std::pair<std::string, std::string> m_zip = std::make_pair("4b50 0403 0014","504b 0304 1400");
     std::pair<std::string, std::string> m_pdf = std::make_pair("5025 4644 312d","2550 4446 2d31");
     std::pair<std::string, std::string> m_run = std::make_pair("457f 464c 0102","7f45 4c46 0201");
