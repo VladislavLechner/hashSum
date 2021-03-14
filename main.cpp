@@ -1,5 +1,4 @@
 #include <boost/filesystem.hpp>
-#include <QDebug>
 #include <iostream>
 #include <fstream>
 
@@ -69,7 +68,7 @@ public:
         }
     }
 
-    bool matching(std::string path, std::string inputFormat)
+    bool matching(const std::string& path, const std::string& inputFormat)
     {
         std::string forHex("file -b " + path + " > format.txt");
         system(forHex.c_str());
@@ -143,6 +142,11 @@ int main(int argc, char *argv[])
         {
             std::cout << "For only one file" << std::endl << md5Sum(dir.string()) << std::endl;
             return 0;
+        }
+        else if (!boost::filesystem::is_directory(dir) && inputFormat != "")
+        {
+            std::string exp("Uncorrect operation");
+            throw exp;
         }
 
         boost::filesystem::recursive_directory_iterator endIt;
