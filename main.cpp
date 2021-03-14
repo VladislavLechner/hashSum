@@ -2,26 +2,6 @@
 #include <iostream>
 #include <fstream>
 
-// @brief поиск контрольной суммы
-std::string md5Sum(std::string path)
-{
-    std::string result;
-    std::string forMd5Sum("md5sum " + path + " > md5sum.txt");
-    system(forMd5Sum.c_str());
-    std::ifstream md5SumFile(boost::filesystem::current_path().string() + "/md5sum.txt");
-    if(md5SumFile.is_open())
-    {
-        getline(md5SumFile, result);
-        md5SumFile.close();
-    }
-    else
-    {
-        std::string exp("Md5Sum file is not opened");
-        throw exp;
-    }
-    return result;
-}
-
 // @brief нахождение формата файла
 class Formats
 {  
@@ -106,7 +86,7 @@ int main(int argc, char *argv[])
         int countOfAllFiles = 0;
         int countOfMatchingFiles = 0;
 
-        std::list<std::string> resultOfHash;
+//        std::list<std::string> resultOfHash;
 
         if (argc > 4)
         {
@@ -141,7 +121,8 @@ int main(int argc, char *argv[])
 
         if (!boost::filesystem::is_directory(dir) && inputFormat == "")
         {
-            std::cout << "For only one file" << std::endl << md5Sum(dir.string()) << std::endl;
+            std::cout << "For only one file" << std::endl;
+            system(dir.c_str());
             return 0;
         }
         else if (!boost::filesystem::is_directory(dir) && inputFormat != "")
@@ -161,7 +142,8 @@ int main(int argc, char *argv[])
                 if (format.matching(it->path().string(), inputFormat))
                 {
                     ++countOfMatchingFiles;
-                    resultOfHash.push_back(md5Sum(it->path().string()));
+                    std::string temp("md5sum " + it->path().string());
+                    system(temp.c_str());
                 }
             }
         }
@@ -169,10 +151,10 @@ int main(int argc, char *argv[])
         std::cout << "All files = "      << countOfAllFiles      << std::endl
                   << "Matching files = " << countOfMatchingFiles << std::endl;
 
-        for (auto &x: resultOfHash)
-        {
-            std::cout << x << std::endl;
-        }
+//        for (auto &x: resultOfHash)
+//        {
+//            std::cout << x << std::endl;
+//        }
         return 0;
 
     }  catch (std::string exp) {
