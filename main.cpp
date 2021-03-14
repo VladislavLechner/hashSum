@@ -2,7 +2,7 @@
 #include <iostream>
 #include <fstream>
 
-
+// @brief поиск контрольной суммы
 std::string md5Sum(std::string path)
 {
     std::string result;
@@ -22,6 +22,7 @@ std::string md5Sum(std::string path)
     return result;
 }
 
+// @brief нахождение формата файла
 class Formats
 {  
     std::string m_pdf = "PDF";
@@ -165,14 +166,13 @@ int main(int argc, char *argv[])
             }
         }
 
-        std::cout << "All files = " << countOfAllFiles << std::endl
-        << "Matching files = " << countOfMatchingFiles << std::endl;
+        std::cout << "All files = "      << countOfAllFiles      << std::endl
+                  << "Matching files = " << countOfMatchingFiles << std::endl;
 
         for (auto &x: resultOfHash)
         {
             std::cout << x << std::endl;
         }
-
         return 0;
 
     }  catch (std::string exp) {
