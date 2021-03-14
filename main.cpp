@@ -151,10 +151,6 @@ int main(int argc, char *argv[])
         std::cout << "All files = "      << countOfAllFiles      << std::endl
                   << "Matching files = " << countOfMatchingFiles << std::endl;
 
-//        for (auto &x: resultOfHash)
-//        {
-//            std::cout << x << std::endl;
-//        }
         return 0;
 
     }  catch (std::string exp) {
