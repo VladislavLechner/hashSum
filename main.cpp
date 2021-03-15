@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
         int countOfAllFiles = 0;
         int countOfMatchingFiles = 0;
 
-//        std::list<std::string> resultOfHash;
+        std::string resultOfHash("md5sum ");
 
         if (argc > 4)
         {
@@ -142,15 +142,15 @@ int main(int argc, char *argv[])
                 if (format.matching(it->path().string(), inputFormat))
                 {
                     ++countOfMatchingFiles;
-                    std::string temp("md5sum " + it->path().string());
-                    system(temp.c_str());
+                    resultOfHash += (it->path().string() + " ");
+
                 }
             }
         }
 
         std::cout << "All files = "      << countOfAllFiles      << std::endl
                   << "Matching files = " << countOfMatchingFiles << std::endl;
-
+        system(resultOfHash.c_str());
         return 0;
 
     }  catch (std::string exp) {
